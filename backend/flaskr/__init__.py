@@ -19,18 +19,13 @@ def create_app(test_config=None):
 
   @app.after_request
   def after_request(response):
-      response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-      response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-      return response
-
-  @app.route('/categories')
-  def category():
-      results = []
-      for item in Category.query.all():
-        results.append(item.type)
-      return jsonify({'categories':results}), 200
+    """ configuring CORS"""
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
   def paginate(page, records):
+    """ return paginated questions """
     start = (page - 1) * RECORDS_PER_PAGE
     end = start + RECORDS_PER_PAGE
     allRecords = []
@@ -45,16 +40,17 @@ def create_app(test_config=None):
 
     return current_records
 
-  '''
-  @TODO:
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
+  @app.route('/categories')
+  def category():
+    """ Handle querying categories """
+    results = []
+    for item in Category.query.all():
+      results.append(item.type)
+    return jsonify({'categories':results}), 200
 
   @app.route('/questions')
   def get_questions():
+    """ Handle querying questions """
     page = request.args.get('page', 1, type=int)
     questions = Question.query.join(Category,
       Category.id == Question.category).add_columns(Category.type).all()
@@ -75,14 +71,9 @@ def create_app(test_config=None):
       'current_category': None
     }), 200
 
-  '''
-  @TODO:
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page. 
-  '''
-
   @app.route('/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
+    """ Handle deleteting a question"""
     question = Question.query.filter_by(id=id).first()
 
     if not question:
@@ -94,15 +85,9 @@ def create_app(test_config=None):
       'message': 'Question Successfully deleted.'
     }), 200
 
-  '''
-  @TODO: 
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
-
   @app.route('/questions', methods=['POST'])
   def create_question():
+    """ Handle creating a new question"""
     body = request.get_json()
     new_question = Question(
       question = body.get("question"),
@@ -122,15 +107,9 @@ def create_app(test_config=None):
       'message': 'Question Successfully added.'
     }), 200
 
-  '''
-  @TODO:
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
-    
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
+    """ Handle searching questions """
     search_term = request.get_json().get("search_term")
     page = request.args.get('page', 1, type=int)
     questions = Question.query.filter(Question.question.contains(search_term)).join(Category,
@@ -138,7 +117,7 @@ def create_app(test_config=None):
     current_questions = paginate(page, questions)
 
     if len(current_questions) == 0:
-      abort(404, "No match found")
+      abort(404, "No match found.")
 
     categories = []
     for item in Category.query.all():
@@ -152,22 +131,16 @@ def create_app(test_config=None):
       'current_category': None
     }), 200
 
-  '''
-  @TODO: 
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
-
   @app.route('/categories/<int:id>/questions')
   def get_questions_by_category(id):
+    """ Handle querying questions by cartegory"""
     page = request.args.get('page', 1, type=int)
     questions = Question.query.filter_by(category=id).join(Category,
       Category.id == Question.category).add_columns(Category.type).all()
     current_questions = paginate(page, questions)
 
     if len(current_questions) == 0:
-      abort(404, "Not found")
+      abort(404, "Not found.")
 
     category = Category.query.filter_by(id=id).first()
     categories = []
@@ -182,15 +155,9 @@ def create_app(test_config=None):
       'current_category': category.type
     }), 200
 
-  '''
-  @TODO:
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
-
   @app.route('/quizzes', methods=['POST'])
   def get_quiz_questions():
+    """ Handle querying a random quiz question"""
     body = request.get_json()
     questions = Question.query.filter_by(category=body.get('quiz_category')['id']
       ).filter(Question.id.notin_(body.get('previous_questions'))).all()
@@ -232,7 +199,7 @@ def create_app(test_config=None):
     response = jsonify({
       'message': 'Method not allowed.'
       })
-    return response, 422
+    return response, 405
 
   return app
 

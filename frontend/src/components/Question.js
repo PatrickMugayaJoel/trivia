@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
 import '../stylesheets/Question.css';
+import {ReactComponent as Art} from '../icons/art.svg';
+import {ReactComponent as Entertainment} from '../icons/entertainment.svg';
+import {ReactComponent as Geography} from '../icons/geography.svg';
+// import {ReactComponent as History} from '../icons/history.svg';
+import {ReactComponent as Science} from '../icons/science.svg';
+import {ReactComponent as Sports} from '../icons/sports.svg';
 
 class Question extends Component {
   constructor(){
@@ -8,6 +14,15 @@ class Question extends Component {
       visibleAnswer: false
     }
   }
+
+  icons = [
+    <Science className="category" />,
+    <Art className="category" />,
+    <Geography className="category" />,
+    <Geography className="category" />,
+    <Entertainment className="category" />,
+    <Sports className="category" />
+  ]
 
   flipVisibility() {
     this.setState({visibleAnswer: !this.state.visibleAnswer});
@@ -19,7 +34,8 @@ class Question extends Component {
       <div className="Question-holder">
         <div className="Question">{question}</div>
         <div className="Question-status">
-          <img className="category" src={`${category}.svg`}/>
+          {console.log(category)}
+          {this.icons[category]}
           <div className="difficulty">Difficulty: {difficulty}</div>
           <img src="delete.png" className="delete" onClick={() => this.props.questionAction('DELETE')}/>
           

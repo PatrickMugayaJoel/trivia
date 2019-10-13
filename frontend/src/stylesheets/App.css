@@ -37,3 +37,8 @@ form {
   width: 80%;
   margin: auto;
 }
+
+.category{
+  width: 20px;
+  height: 20px;
+}

@@ -4,6 +4,12 @@ import '../stylesheets/App.css';
 import Question from './Question';
 import Search from './Search';
 import $ from 'jquery';
+import {ReactComponent as Art} from '../icons/art.svg';
+import {ReactComponent as Entertainment} from '../icons/entertainment.svg';
+import {ReactComponent as Geography} from '../icons/geography.svg';
+// import {ReactComponent as History} from '../icons/history.svg';
+import {ReactComponent as Science} from '../icons/science.svg';
+import {ReactComponent as Sports} from '../icons/sports.svg';
 
 class QuestionView extends Component {
   constructor(){
@@ -12,10 +18,19 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
+
+  icons = [
+    <Science className="category" />,
+    <Art className="category" />,
+    <Geography className="category" />,
+    <Geography className="category" />,
+    <Entertainment className="category" />,
+    <Sports className="category" />
+  ]
 
   componentDidMount() {
     this.getQuestions();
@@ -30,7 +45,8 @@ class QuestionView extends Component {
           questions: result.questions,
           totalQuestions: result.total_questions,
           categories: result.categories,
-          currentCategory: result.current_category })
+          currentCategory: result.current_category 
+      })
         return;
       },
       error: (error) => {
@@ -78,11 +94,11 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/questions/search`, //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({search_term: searchTerm}),
       xhrFields: {
         withCredentials: true
       },
@@ -125,12 +141,14 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
+            {Object.keys(this.state.categories).map((id, ) => {
+              id = parseInt(id);
+              return (
+              <li key={id+1} onClick={() => {this.getByCategory(id+1)}}>
                 {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`}/>
+                {this.icons[id]}
               </li>
-            ))}
+            )})}
           </ul>
           <Search submitSearch={this.submitSearch}/>
         </div>
@@ -141,7 +159,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]} 
+              category={this.state.categories.indexOf(q.category)} 
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />

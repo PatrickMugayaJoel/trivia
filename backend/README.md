@@ -45,6 +45,11 @@ To run the server, execute:
 ```bash
 export FLASK_APP=flaskr
 export FLASK_ENV=development
+export PSQL_USER=your_db_user
+export PSQL_PASSWORD=your_db_password
+export PSQL_HOST=your_db_host
+export PSQL_PORT=your_db_port
+export PSQL_DATABASE=your_db_name
 flask run
 ```
 
@@ -68,30 +73,150 @@ One note before you delve into your tasks: for each endpoint you are expected to
 
 REVIEW_COMMENT
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
 Endpoints
 GET '/categories'
-GET ...
-POST ...
-DELETE ...
+GET '/questions'
+POST '/questions'
+DELETE '/questions'
+POST '/questions/search'
+GET '/categories/<int>/questions'
+POST '/quizzes'
 
 GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Fetches a list of categories.
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
+- Success status code: 200
+- Returns: An object with a single key, categories, that contains a list of categories. 
+{
+  "categories": [
+    "Science",
+    "Art",
+    ...
+  ]
+}
+
+GET '/questions'
+- Fetches a list of paginated questions.
+- Request Arguments: `page=<int>` represents the current page number
+- Success status code: 200
+- Failure status code: 404
+- Returns: An object with 5 keys:
+  - categories that contains a list of categories.
+  - current_category that contains the category of returned questions.
+  - questions that contains a list of questions.
+  - success that contains a boolean that indicates success/failure of the request.
+  - total_questions that contains total number of questions. 
+{
+  "categories": [
+    "Science",
+    ...
+  ],
+  "current_category": "all",
+  "questions": [
+    {
+      "answer": "Agra",
+      "category": "Geography",
+      "category_id": 3,
+      "difficulty": 2,
+      "id": 15,
+      "question": "The Taj Mahal is located in which Indian city?"
+    },
+    ...
+  ],
+  "success": true,
+  "total_questions": 19
+}
+- On failure returns: { 'message': error description }
+
+POST '/questions'
+- Adds a new question.
+- Request Arguments: None
+- Takes a json body:
+{
+	"question": "...",
+	"answer": "...",
+	"category": 1,
+	"difficulty": 2
+}
+- Success status code: 201
+- Failure status code: 400
+- Returns: An object with 2 keys,
+  - success that contains a boolean that indicates success/failure of the request.
+  - message that contains a user message.
+{
+    'success': True,
+    'message': 'Question Successfully added.'
+}
+- On failure returns: { 'message': error description }
+
+DELETE '/questions/<int>'
+- Deletes the question with the provided id.
+- Request Arguments: None
+- Success status code: 200
+- Failure status code: 404
+- Returns: An object with 2 keys,
+  - success that contains a boolean that indicates success/failure of the request.
+  - message that contains a user message.
+{
+    'success': True,
+    'message': 'Question Successfully deleted.'
+}
+- On failure returns: { 'message': error description }
+
+POST '/questions/search'
+- Fetches questions that contain the search string.
+- Request Arguments: None
+- Takes a json body: Note that the search is case sensitive 
+{
+	"search_term": "..."
+}
+- Success status code: 200
+- Failure status code: 404
+- Returns: Same as GET '/questions' above
+- On failure returns: { 'message': error description }
+
+GET '/categories/<int>/questions'
+- Fetches questions that belong to a specific category.
+- Request Arguments: None
+- Success status code: 200
+- Failure status code: 404
+- Returns: Same as GET '/questions' above
+- On failure returns: { 'message': error description }
+
+POST '/quizzes'
+- Fetches questions that contain the search string.
+- Request Arguments: None
+- Takes a json body: Note that the search is case sensitive 
+{
+	"quiz_category": {"id":2}, # id of category to select from
+	"previous_questions": [16, ...] # array of already displayed questions
+}
+- Success status code: 200
+- Failure status code: 404
+- Returns: An object with 2 keys,
+  - success that contains a boolean that indicates success/failure of the request.
+  - question that contains a question to display next.
+{
+  "question": {
+    "answer": "...",
+    "category": 1,
+    "difficulty": 1,
+    "id": 1,
+    "question": "..."
+  },
+  "success": true
+}
+- On failure returns: { 'message': error description }
 
 ```
 
 
 ## Testing
-To run the tests, run
+To run the tests:
+- Export environment variables as directed in the 'Running the server' section above.
+Note: Irrespective of the exported database name, tests will be run against a database name `trivia_test` with the exported db_user and db_password.
+
+Then run
 ```
 dropdb trivia_test
 createdb trivia_test

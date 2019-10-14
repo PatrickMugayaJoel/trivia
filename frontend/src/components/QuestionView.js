@@ -111,7 +111,11 @@ class QuestionView extends Component {
         return;
       },
       error: (error) => {
-        alert('Unable to load questions. Please try your request again')
+        if(error.responseJSON){
+          alert(error.responseJSON.message);
+        }else{
+          alert('An unexpected error occured while loading questions!.');
+        }
         return;
       }
     })

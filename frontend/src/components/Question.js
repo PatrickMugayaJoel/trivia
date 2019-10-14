@@ -34,7 +34,6 @@ class Question extends Component {
       <div className="Question-holder">
         <div className="Question">{question}</div>
         <div className="Question-status">
-          {console.log(category)}
           {this.icons[category]}
           <div className="difficulty">Difficulty: {difficulty}</div>
           <img src="delete.png" className="delete" onClick={() => this.props.questionAction('DELETE')}/>
